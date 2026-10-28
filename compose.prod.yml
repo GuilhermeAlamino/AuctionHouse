@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: ${APP_IMAGE:?Defina APP_IMAGE}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL:?Defina DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET}
+      AUDITORIA_CHAVE_HEX: ${AUDITORIA_CHAVE_HEX:?Defina AUDITORIA_CHAVE_HEX}
+      AUDITORIA_DIRETORIO: /app/.dados/auditoria
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Defina DEMO_PASSWORD}
+    ports:
+      - "127.0.0.1:3002:3001"
+    volumes:
+      - ./.dados/auditoria:/app/.dados/auditoria
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3001/health').then(r => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  postgres_data:
