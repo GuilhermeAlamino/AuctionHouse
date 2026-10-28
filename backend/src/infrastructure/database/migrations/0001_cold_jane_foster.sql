@@ -1,0 +1,1 @@
+ALTER TABLE "lotes" ADD COLUMN "encerrado_em" timestamp with time zone;

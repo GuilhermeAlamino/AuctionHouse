@@ -1,0 +1,506 @@
+{
+  "id": "7b47caa2-e9f6-4a68-9621-8f1b7a89d692",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.carteiras": {
+      "name": "carteiras",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "usuario_id": {
+          "name": "usuario_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "saldo_total": {
+          "name": "saldo_total",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "saldo_comprometido": {
+          "name": "saldo_comprometido",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "carteiras_usuario_id_usuarios_id_fk": {
+          "name": "carteiras_usuario_id_usuarios_id_fk",
+          "tableFrom": "carteiras",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "usuario_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "carteiras_usuario_id_unique": {
+          "name": "carteiras_usuario_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "usuario_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "saldo_total_positivo": {
+          "name": "saldo_total_positivo",
+          "value": "\"carteiras\".\"saldo_total\" >= 0"
+        },
+        "saldo_comprometido_valido": {
+          "name": "saldo_comprometido_valido",
+          "value": "\"carteiras\".\"saldo_comprometido\" >= 0\n        AND \"carteiras\".\"saldo_comprometido\" <= \"carteiras\".\"saldo_total\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.comprovantes": {
+      "name": "comprovantes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "lote_id": {
+          "name": "lote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "licitante_id": {
+          "name": "licitante_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lance_vencedor_id": {
+          "name": "lance_vencedor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "comprovantes_lote_id_lotes_id_fk": {
+          "name": "comprovantes_lote_id_lotes_id_fk",
+          "tableFrom": "comprovantes",
+          "tableTo": "lotes",
+          "columnsFrom": [
+            "lote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "comprovantes_licitante_id_usuarios_id_fk": {
+          "name": "comprovantes_licitante_id_usuarios_id_fk",
+          "tableFrom": "comprovantes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "licitante_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "comprovantes_lance_vencedor_id_lances_id_fk": {
+          "name": "comprovantes_lance_vencedor_id_lances_id_fk",
+          "tableFrom": "comprovantes",
+          "tableTo": "lances",
+          "columnsFrom": [
+            "lance_vencedor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "comprovantes_lote_id_unique": {
+          "name": "comprovantes_lote_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "lote_id"
+          ]
+        },
+        "comprovantes_lance_vencedor_id_unique": {
+          "name": "comprovantes_lance_vencedor_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "lance_vencedor_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.itens": {
+      "name": "itens",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "imagem": {
+          "name": "imagem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lances": {
+      "name": "lances",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "lote_id": {
+          "name": "lote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "licitante_id": {
+          "name": "licitante_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_monetario": {
+          "name": "valor_monetario",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequencia": {
+          "name": "sequencia",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "realizado_em": {
+          "name": "realizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "lance_sequencia_lote_idx": {
+          "name": "lance_sequencia_lote_idx",
+          "columns": [
+            {
+              "expression": "lote_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sequencia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "lances_lote_id_lotes_id_fk": {
+          "name": "lances_lote_id_lotes_id_fk",
+          "tableFrom": "lances",
+          "tableTo": "lotes",
+          "columnsFrom": [
+            "lote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "lances_licitante_id_usuarios_id_fk": {
+          "name": "lances_licitante_id_usuarios_id_fk",
+          "tableFrom": "lances",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "licitante_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "valor_lance_positivo": {
+          "name": "valor_lance_positivo",
+          "value": "\"lances\".\"valor_monetario\" > 0"
+        },
+        "sequencia_lance_positiva": {
+          "name": "sequencia_lance_positiva",
+          "value": "\"lances\".\"sequencia\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.lotes": {
+      "name": "lotes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "leiloeiro_id": {
+          "name": "leiloeiro_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lance_inicial": {
+          "name": "lance_inicial",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "incremento_minimo": {
+          "name": "incremento_minimo",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "horario_inicio": {
+          "name": "horario_inicio",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "horario_fim": {
+          "name": "horario_fim",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cancelado_em": {
+          "name": "cancelado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prorrogado": {
+          "name": "prorrogado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "lotes_leiloeiro_id_usuarios_id_fk": {
+          "name": "lotes_leiloeiro_id_usuarios_id_fk",
+          "tableFrom": "lotes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "leiloeiro_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "lotes_item_id_itens_id_fk": {
+          "name": "lotes_item_id_itens_id_fk",
+          "tableFrom": "lotes",
+          "tableTo": "itens",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "periodo_lote_valido": {
+          "name": "periodo_lote_valido",
+          "value": "\"lotes\".\"horario_inicio\" < \"lotes\".\"horario_fim\""
+        },
+        "lance_inicial_positivo": {
+          "name": "lance_inicial_positivo",
+          "value": "\"lotes\".\"lance_inicial\" > 0"
+        },
+        "incremento_minimo_positivo": {
+          "name": "incremento_minimo_positivo",
+          "value": "\"lotes\".\"incremento_minimo\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.usuarios": {
+      "name": "usuarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "apelido": {
+          "name": "apelido",
+          "type": "varchar(80)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(254)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel_usuario": {
+          "name": "papel_usuario",
+          "type": "papel_usuario",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuarios_email_unique": {
+          "name": "usuarios_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.papel_usuario": {
+      "name": "papel_usuario",
+      "schema": "public",
+      "values": [
+        "LEILOEIRO",
+        "LICITANTE"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
