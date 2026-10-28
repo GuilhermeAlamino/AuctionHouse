@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light;
+  --cor-fundo: #fafafa;
+  --cor-superficie: #fff;
+  --cor-texto: #171717;
+  --cor-muted: #737373;
+  --cor-borda: #e5e5e5;
+  --cor-borda-forte: #d4d4d4;
+  --cor-cabecalho: #fff;
+  --cor-acao: #171717;
+  --cor-acao-hover: #333;
+  --cor-foco: #525252;
+  --largura-conteudo: 1200px;
+  --raio: 8px;
+}
