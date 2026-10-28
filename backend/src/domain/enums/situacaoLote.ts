@@ -1,0 +1,6 @@
+export enum SituacaoLote {
+  AGENDADO = "AGENDADO",
+  EM_ANDAMENTO = "EM_ANDAMENTO",
+  ENCERRADO = "ENCERRADO",
+  CANCELADO = "CANCELADO",
+}
