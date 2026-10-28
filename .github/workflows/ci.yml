@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Tipagem, testes e build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependências
+        run: npm ci
+
+      - name: Tipagem
+        run: npm run check
+
+      - name: Testes de domínio
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  integration:
+    name: Integração com PostgreSQL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: leiloes
+          POSTGRES_PASSWORD: senha_apenas_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U leiloes -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Dependências
+        run: npm ci
+
+      - name: Preparar ambiente isolado
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/auditoria-test"
+          cat > .env.test <<EOF
+          NODE_ENV=test
+          DATABASE_URL=postgresql://leiloes:senha_apenas_ci@127.0.0.1:5432/casa_leiloes_test
+          AUDITORIA_CHAVE_HEX=$(openssl rand -hex 32)
+          AUDITORIA_DIRETORIO=$RUNNER_TEMP/auditoria-test
+          EOF
+
+      - name: Testes de integração
+        run: npm run test:integration

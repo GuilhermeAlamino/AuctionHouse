@@ -1,0 +1,158 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publicar imagem no GHCR
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+    steps:
+      - name: Checkout do commit aprovado
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Nome da imagem
+        id: image
+        shell: bash
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Autenticar no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir e publicar
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:sha-${{ github.event.workflow_run.head_sha }}
+            ${{ steps.image.outputs.name }}:latest
+
+  deploy:
+    name: Atualizar aplicação na VPS
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do commit aprovado
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Copiar Compose de produção
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          port: ${{ secrets.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: compose.prod.yml
+          target: /var/www/AuctionHouse
+
+      - name: Implantar e verificar
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          port: ${{ secrets.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -eu
+            cd /var/www/AuctionHouse
+            test -f .env.production || { echo "Arquivo .env.production ausente"; exit 1; }
+
+            NEXT=.env.deploy.next
+            CURRENT=.env.deploy
+            PREVIOUS=.env.deploy.previous
+            IMAGE="${{ needs.publish.outputs.image }}:sha-${{ github.event.workflow_run.head_sha }}"
+            printf 'APP_IMAGE=%s\n' "$IMAGE" > "$NEXT"
+            chmod 600 "$NEXT"
+            mkdir -p .dados/auditoria
+
+            # Imagem nova disponível antes de alterar o serviço em execução.
+            docker compose -f compose.prod.yml \
+              --env-file .env.production --env-file "$NEXT" \
+              pull app
+
+            # Inicia o banco apenas se necessário; não apaga o volume existente.
+            docker compose -f compose.prod.yml \
+              --env-file .env.production --env-file "$NEXT" \
+              up -d postgres
+
+            # Migrations antes da troca: devem ser compatíveis com a versão anterior.
+            docker compose -f compose.prod.yml \
+              --env-file .env.production --env-file "$NEXT" \
+              run --rm app npm run db:migrate
+
+            if [ -f "$CURRENT" ]; then
+              cp "$CURRENT" "$PREVIOUS"
+            else
+              rm -f "$PREVIOUS"
+            fi
+            mv "$NEXT" "$CURRENT"
+
+            healthy() {
+              for attempt in $(seq 1 15); do
+                if curl -fsS --max-time 5 http://127.0.0.1:3002/health \
+                  | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"'; then
+                  return 0
+                fi
+                sleep 3
+              done
+              return 1
+            }
+
+            rollback() {
+              if [ ! -f "$PREVIOUS" ]; then
+                echo "Sem imagem anterior para rollback (primeiro deploy)."
+                return 1
+              fi
+              cp "$PREVIOUS" "$CURRENT"
+              docker compose -f compose.prod.yml \
+                --env-file .env.production --env-file "$CURRENT" \
+                up -d --no-build --force-recreate app
+              healthy
+            }
+
+            if ! docker compose -f compose.prod.yml \
+              --env-file .env.production --env-file "$CURRENT" \
+              up -d --no-build --force-recreate app; then
+              echo "Falha ao iniciar a versão nova."
+              rollback || true
+              exit 1
+            fi
+
+            if ! healthy; then
+              echo "Versão nova não passou no health check."
+              rollback || true
+              exit 1
+            fi
+
+            echo "Deploy concluído: $IMAGE"
