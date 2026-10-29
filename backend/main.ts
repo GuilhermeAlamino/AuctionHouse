@@ -13,6 +13,9 @@ import { licitanteRoutes } from "./src/http/routes/licitanteRoutes.js";
 import { leiloeiroRoutes } from "./src/http/routes/leiloeiroRoutes.js";
 
 const app = express();
+
+app.set("trust proxy", 1);
+
 const PORT = Number(process.env.PORT ?? 3001);
 
 app.use(express.json());

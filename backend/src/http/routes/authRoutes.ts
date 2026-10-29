@@ -2,10 +2,21 @@ import { Router } from "express";
 
 import { autenticarUsuario } from "../../application/use-cases/autenticarUsuario.js";
 import { gerarToken } from "../jwt.js";
+import { rateLimit } from "express-rate-limit";
 
 export const authRoutes = Router();
 
-authRoutes.post("/login", async (req, res) => {
+const limitarLogin = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    erro: "Muitas tentativas de login. Tente novamente mais tarde.",
+  },
+});
+
+authRoutes.post("/login", limitarLogin, async (req, res) => {
   try {
     const { email, senha } = req.body ?? {};
 
