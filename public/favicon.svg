@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Casa de Leilões">
+  <!-- Matches frontend/src/styles/tokens.css and Cabecalho.tsx: monochrome #171717 and CL -->
+  <rect width="64" height="64" rx="11" fill="#171717" />
+  <g fill="#ffffff">
+    <path d="M786 -20C1162 -20 1394 233 1428 510H1119C1089 348 961 251 791 251C561 251 404 421 404 744C404 1060 559 1239 792 1239C962 1239 1090 1143 1118 981H1427C1383 1316 1125 1510 786 1510C393 1510 94 1231 94 744C94 260 389 -20 786 -20Z" transform="translate(9.423323 44.496006) scale(0.0167732 -0.0167732)" />
+    <path d="M135 0H1083V253H440V1490H135Z" transform="translate(34.834665 44.496006) scale(0.0167732 -0.0167732)" />
+  </g>
+</svg>
