@@ -84,9 +84,9 @@ async function executarSeed(): Promise<void> {
 
     if (!loteAberto) {
       const [produto] = await tx.insert(itens).values({
-        titulo: "Essence Mascara Lash Princess",
-        descricao: "Máscara de cílios utilizada como produto demonstrativo do leilão.",
-        imagem: "https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp",
+        titulo: "Calvin Klein CK One",
+        descricao: "CK One by Calvin Klein is a classic unisex fragrance, known for its fresh and clean scent. It's a versatile fragrance suitable for everyday wear.",
+        imagem: "https://cdn.dummyjson.com/product-images/fragrances/calvin-klein-ck-one/thumbnail.webp",
       }).returning({ id: itens.id });
 
       await tx.insert(lotes).values({

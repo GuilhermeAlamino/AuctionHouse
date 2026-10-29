@@ -4,11 +4,29 @@ import { Link } from "react-router";
 import { api } from "../api/endpoints";
 import type { Sessao } from "../types";
 
+// Contas fictícias disponibilizadas apenas para avaliação da plataforma.
+const senhaDemonstracao = "leiloes2026";
+const contasDemonstracao = [
+  { papel: "Leiloeiro", email: "guilhermealmeida@demo.com" },
+  { papel: "Licitante 1", email: "anasouza@demo.com" },
+  { papel: "Licitante 2", email: "brunolima@demo.com" },
+] as const;
+
 export function Login({ autenticar }: { autenticar: (sessao: Sessao) => void }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [copiado, setCopiado] = useState("");
+
+  async function copiar(texto: string, identificador: string) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado(identificador);
+    } catch {
+      setCopiado("");
+    }
+  }
 
   async function entrar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -42,7 +60,51 @@ export function Login({ autenticar }: { autenticar: (sessao: Sessao) => void }) 
             </button>
             {erro && <p className="mensagem mensagem-erro" role="alert">{erro}</p>}
           </form>
-          <p className="small text-secondary text-center mt-4 mb-0">Não há cadastro público nesta versão.</p>
+          <section className="border-top mt-4 pt-3" aria-labelledby="acessos-demo">
+            <h2 id="acessos-demo" className="h6 mb-2">Acessos de demonstração</h2>
+            <p className="small text-secondary mb-3">
+              Escolha um usuário para preencher o login ou copie os dados abaixo.
+            </p>
+            {contasDemonstracao.map((conta) => (
+              <div key={conta.email} className="border rounded p-2 mb-2">
+                <strong className="small d-block mb-1">{conta.papel}</strong>
+                <code className="small text-break d-block mb-2">{conta.email}</code>
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm flex-fill"
+                    onClick={() => void copiar(conta.email, conta.email)}
+                  >
+                    {copiado === conta.email ? "Copiado!" : "Copiar e-mail"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-principal btn-sm flex-fill"
+                    onClick={() => {
+                      setEmail(conta.email);
+                      setSenha(senhaDemonstracao);
+                      setErro("");
+                    }}
+                  >
+                    Usar conta
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="small mt-3 d-flex align-items-center gap-2 flex-wrap">
+              <span>Senha de todas as contas: <code>{senhaDemonstracao}</code></span>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => void copiar(senhaDemonstracao, "senha")}
+              >
+                {copiado === "senha" ? "Copiada!" : "Copiar senha"}
+              </button>
+            </div>
+            <p className="small text-secondary mt-3 mb-0">
+              Ambiente demonstrativo, com saldos fictícios e sem cadastro público.
+            </p>
+          </section>
         </div>
         <p className="text-center mt-4 small"><Link className="link-acao" to="/">← Voltar aos leilões</Link></p>
       </div>
