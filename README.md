@@ -8,6 +8,8 @@ O [Documento de Requisitos](docs/REQUISITOS.pdf) apresenta o glossário,
 escopo, priorização, histórias de usuário, critérios de aceitação e
 cenários que orientaram o desenvolvimento do AuctionHouse.
 
+**Aplicação em produção:** https://leiloes.guilhermealamino.com.br
+
 O desenvolvimento começou pela compreensão do negócio: identificação das entidades, documento de requisitos, histórias de usuário, critérios de aceitação e cenários essenciais. **A escolha das tecnologias veio depois da definição dos comportamentos esperados.** O prazo de sete dias orientou decisões de escopo e simplicidade, registradas em [Decisões e limites](docs/DECISOES.md).
 
 ## Tecnologias
@@ -35,9 +37,15 @@ flowchart TB
     APP <-->|Leitura e escrita| AUD
 ```
 
-**Por quê?** A aplicação e o banco têm ciclos de vida separados, enquanto Express e React compilado são publicados juntos para reduzir complexidade. O React **executa no navegador**; o Express apenas entrega seus arquivos. **Nginx/HTTPS representam a implantação planejada na VPS**, não um deploy já confirmado.
+**Por quê?** A aplicação utiliza dois contêineres Docker: um para o Node.js/Express, responsável pela API e pela entrega do frontend React compilado, e outro para o PostgreSQL.
+
+Essa separação permite gerenciar a aplicação e a persistência de dados independentemente, reduzindo a complexidade de implantação.
+
+O deploy é automatizado pelo GitHub Actions, utilizando imagens Docker versionadas e publicadas no GitHub Container Registry (GHCR).
 
 [Arquitetura e estrutura do backend e frontend](docs/ARQUITETURA.md)
+
+A autenticação possui limitação de 10 requisições por IP a cada minuto. Ao exceder o limite, a API retorna HTTP 429, com liberação automática ao término da janela. O controle é mantido em memória pela aplicação.
 
 ## Executar com Docker
 
@@ -90,7 +98,7 @@ npm run test:integration
 npm run build
 ```
 
-**Atenção:** a integração exige `.env.test` com banco `casa_leiloes_test` e auditoria isolada; consulte as instruções antes de executá-la. O comando de cobertura mede os **testes de domínio**, não toda a aplicação. [Detalhes e espaço para imagem de cobertura](docs/EXECUCAO.md#testes-e-cobertura).
+**Atenção:** a integração exige `.env.test` com banco `casa_leiloes_test` e auditoria isolada; consulte as instruções antes de executá-la. O comando de cobertura mede os **testes de domínio**, não toda a aplicação. [Detalhes dos testes e cobertura](docs/EXECUCAO.md#testes-e-cobertura).
 
 ## Decisões e limites
 

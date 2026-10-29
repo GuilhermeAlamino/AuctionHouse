@@ -21,7 +21,7 @@ O prazo de **sete dias** exigiu priorizar as regras essenciais e registrar escol
 - **Lances:** apenas licitantes ofertam durante a disputa, respeitando início, valor mínimo, incremento e proibição de superar o próprio lance.
 - **Carteira:** o lance líder compromete o valor. Ao ser superado por um lance legítimo, o comprometimento anterior é liberado. O restante do saldo disponível pode ser usado em outros lotes.
 - **Ciclo do lote:** cancelamento e encerramento são distintos; não se cancela um lote já encerrado nem com lances.
-- **Prorrogação:** foi adotada **uma única extensão de dois minutos**, no primeiro lance aceito na janela final. Foi uma decisão de escopo, **não uma regra universal de leilões**.
+- **Prorrogação:** o primeiro lance válido aceito nos dois minutos finais da disputa prorroga o encerramento em dois minutos. Cada lote pode ser prorrogado uma única vez, conforme os critérios de aceitação do documento de requisitos.
 
 ### Auditoria: comportamento e limites
 
@@ -31,8 +31,6 @@ O prazo de **sete dias** exigiu priorizar as regras essenciais e registrar escol
 - O valor legítimo de **R$ 120 de Bruno permanece comprometido**; o saldo disponível dele segue utilizável em outros lotes.
 - A comparação entre banco e trilha aponta histórico **`INCONSISTENTE`**. Uma tentativa posterior de lance pela API pode falhar por divergência da sequência assinada; **não há bloqueio universal de toda forma de adulteração**.
 - **Política pretendida:** um histórico `INCONSISTENTE` ou `NAO_VERIFICAVEL` não deve liquidar nem gerar comprovante; saldos já comprometidos não são estornados automaticamente. Isso requer a verificação explícita na liquidação.
-
-**Estado de verificação:** no ZIP revisado, `liquidarArrematacao.ts` não realizava essa conferência. A correção posterior foi preparada, mas precisa ser confirmada e testada no repositório antes da publicação. Não é correto atribuir a proteção ao código antigo.
 
 **Limite técnico:** banco e JSONL são gravados em sistemas distintos, sem commit atômico. Uma falha entre operações pode criar divergências legítimas. A proteção também depende do sigilo da chave HMAC e do controle de acesso ao diretório da trilha.
 
@@ -50,15 +48,15 @@ O prazo de **sete dias** exigiu priorizar as regras essenciais e registrar escol
 
 - **Vitrine:** lotes agendados, em andamento e encerrados; cancelados não aparecem.
 - **Carteira e participações:** páginas distintas para saldo e histórico de disputas.
-- **Identidade:** nomes reais na área do próprio usuário; participantes **anonimizados publicamente**. Para uma apresentação mais natural, `Participante A/B` pode substituir `Licitante 1/2` sem expor identidades — essa mudança ainda não foi aplicada.
+- **Identidade:** as áreas autenticadas apresentam as informações do próprio usuário. Nas consultas públicas, os participantes são identificados por rótulos anônimos, como `Licitante 1` e `Licitante 2`, preservando seus dados pessoais.
 - **Comprovante:** resultado público compartilhável por link, sem geração de PDF.
 
-## Pontos para refinamento com cliente ou PO
+## Regras adotadas e pontos de refinamento com cliente ou PO
 
 | Pergunta | Decisão adotada neste escopo |
 | --- | --- |
 | Prorrogar a cada lance nos últimos dois minutos ou limitar as extensões? | **Uma única prorrogação.** |
-| Como tratar histórico adulterado, saldo comprometido e estorno? | **Não liberar automaticamente**; política de bloqueio de liquidação precisa ser confirmada na implementação. |
+| Como tratar histórico adulterado, saldo comprometido e estorno? | Definir se uma inconsistência deve bloquear a liquidação e qual procedimento deverá regularizar os saldos. |
 | O histórico público deve identificar pessoas pelo nome? | **Não**; a identidade permanece anônima na disputa pública. |
 
 **Fora do escopo:** pagamentos reais, estorno automático, painel de resolução de conflitos e armazenamento de auditoria inviolável.

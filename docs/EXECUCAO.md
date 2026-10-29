@@ -72,7 +72,6 @@ O `db:reset` é destrutivo e protegido para ambiente local. Não o execute dentr
 ```bash
 npm run check
 npm run test
-npm run test:frontend
 npm run test:coverage
 npm run build
 ```

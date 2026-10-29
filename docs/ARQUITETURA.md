@@ -33,10 +33,6 @@ flowchart LR
 
 ![Modelagem das entidades](assets/modelagem-classes.jpg)
 
-<!-- Quando o diagrama for adicionado, substituir a linha acima por:
-![Modelagem das entidades](assets/modelagem-classes.png)
--->
-
 ## Frontend
 
 ### Estrutura
@@ -62,7 +58,13 @@ O React apresenta o estado, navega e envia comandos à API; **não decide se um 
 
 O `compose.yml` reúne **app** (Express + React compilado + SSE) e **postgres**. O PostgreSQL utiliza um volume Docker; a auditoria utiliza um diretório persistido no host.
 
-Na VPS, a topologia **prevista** utiliza Nginx como entrada HTTPS e proxy reverso para o contêiner `app`. A publicação da porta da aplicação deve ficar restrita ao host, e a conexão SSE precisa atravessar o proxy sem buffering. Não é necessária uma instância separada para servir o React neste estágio.
+Em produção, a aplicação e o PostgreSQL executam em contêineres independentes, gerenciados pelo Docker Compose.
+
+O Express disponibiliza a API, as conexões SSE e os arquivos estáticos compilados do React, dispensando um serviço exclusivo para o frontend.
+
+A aplicação utiliza a porta interna 3001, publicada exclusivamente na interface local da VPS pela porta 3002.
+
+Para acesso externo, o Nginx pode atuar como proxy reverso HTTPS. Nas conexões SSE, o buffering deve ser desabilitado para evitar atrasos na entrega dos eventos ao navegador.
 
 [Consultar o processo de publicação](DEPLOY.md)
 

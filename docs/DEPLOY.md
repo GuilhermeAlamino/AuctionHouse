@@ -25,7 +25,9 @@ O deploy ocorre **somente após o CI de um push na `main` passar**. A VPS recebe
 | **`postgres` (contêiner)** | Dados transacionais, em volume persistente. |
 | **`.dados/auditoria` (host)** | Trilha JSONL assinada, preservada entre versões. |
 
-O React é executado no navegador. A porta interna do Express é `3001`; a porta **planejada no host da VPS é `127.0.0.1:3002`**, reservando `3001` para outro serviço.
+O Express utiliza a porta interna 3001, publicada em 127.0.0.1:3002 na VPS. Essa configuração restringe o acesso direto à aplicação ao próprio host, permitindo que um proxy reverso gerencie sua exposição externa.
+
+A aplicação é disponibilizada pelo domínio [leiloes.guilhermealamino.com.br](https://leiloes.guilhermealamino.com.br), utilizando Nginx como proxy reverso para o serviço Express executado no Docker.
 
 [Ver diagrama de arquitetura](../README.md#arquitetura-de-implantação)
 
@@ -42,8 +44,6 @@ O React é executado no navegador. A porta interna do Express é `3001`; a porta
 
 4. No repositório GitHub, cadastre os secrets `VPS_HOST`, `VPS_USER`, `VPS_PORT` e `VPS_SSH_KEY`. O usuário SSH precisa conseguir executar o Docker Compose.
 5. Se a imagem GHCR for privada, configure na VPS um token com `read:packages`. Configure o Nginx com HTTPS apontando para `http://127.0.0.1:3002` e `proxy_buffering off;` para SSE.
-
-**Antes de ativar o deploy:** alinhe `compose.prod.yml` e `.github/workflows/deploy.yml` à porta `3002` do host. Na versão revisada, esses arquivos ainda utilizavam `3001`.
 
 ## Primeira publicação
 
