@@ -4,6 +4,10 @@ Plataforma de leilões com publicação de lotes, disputas em tempo real, cartei
 
 ## Do entendimento à implementação
 
+O [Documento de Requisitos](docs/REQUISITOS.pdf) apresenta o glossário,
+escopo, priorização, histórias de usuário, critérios de aceitação e
+cenários que orientaram o desenvolvimento do AuctionHouse.
+
 O desenvolvimento começou pela compreensão do negócio: identificação das entidades, documento de requisitos, histórias de usuário, critérios de aceitação e cenários essenciais. **A escolha das tecnologias veio depois da definição dos comportamentos esperados.** O prazo de sete dias orientou decisões de escopo e simplicidade, registradas em [Decisões e limites](docs/DECISOES.md).
 
 ## Tecnologias
